@@ -686,10 +686,6 @@ static int pmw3610_report_data(const struct device *dev) {
         data->last_y = 0;
     }
 #endif
-
-    // ★ このあたりで微ブレ除去処理を追加！
-    if (abs(x) < 2) x = 0;
-    if (abs(y) < 2) y = 0;
     
     if (x != 0 || y != 0) {
         if (input_mode != SCROLL) {
