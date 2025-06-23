@@ -561,6 +561,12 @@ static void deactivate_automouse_layer(struct k_timer *timer) {
 K_TIMER_DEFINE(automouse_layer_timer, deactivate_automouse_layer, NULL);
 #endif
 
+#define SMOOTHING_COUNT 3  // 平均するフレーム数（調整OK）
+
+static int16_t smoothing_buf_x[SMOOTHING_COUNT] = {0};
+static int16_t smoothing_buf_y[SMOOTHING_COUNT] = {0};
+static uint8_t smoothing_index = 0;
+
 static enum pixart_input_mode get_input_mode_for_current_layer(const struct device *dev) {
     const struct pixart_config *config = dev->config;
     uint8_t curr_layer = zmk_keymap_highest_layer_active();
@@ -661,6 +667,23 @@ static int pmw3610_report_data(const struct device *dev) {
         y = 0;
     }
 
+/ ★ここから追加！過去の値を記録して平均をとる
+smoothing_buf_x[smoothing_index] = x;
+smoothing_buf_y[smoothing_index] = y;
+smoothing_index = (smoothing_index + 1) % SMOOTHING_COUNT;
+
+int32_t sum_x = 0;
+int32_t sum_y = 0;
+for (int i = 0; i < SMOOTHING_COUNT; i++) {
+    sum_x += smoothing_buf_x[i];
+    sum_y += smoothing_buf_y[i];
+}
+
+x = sum_x / SMOOTHING_COUNT;
+y = sum_y / SMOOTHING_COUNT;
+// ★ここまで
+
+    
 #ifdef CONFIG_PMW3610_SMART_ALGORITHM
     int16_t shutter =
         ((int16_t)(buf[PMW3610_SHUTTER_H_POS] & 0x01) << 8) + buf[PMW3610_SHUTTER_L_POS];
