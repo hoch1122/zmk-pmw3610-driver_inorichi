@@ -655,6 +655,12 @@ static int pmw3610_report_data(const struct device *dev) {
         y = -y;
     }
 
+     // ★ベクトル長で微ブレ除去
+    if ((x * x + y * y) < CONFIG_PMW3610_DEADZONE_THRESHOLD) {
+        x = 0;
+        y = 0;
+    }
+
 #ifdef CONFIG_PMW3610_SMART_ALGORITHM
     int16_t shutter =
         ((int16_t)(buf[PMW3610_SHUTTER_H_POS] & 0x01) << 8) + buf[PMW3610_SHUTTER_L_POS];
