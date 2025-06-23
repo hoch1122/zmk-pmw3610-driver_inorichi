@@ -688,7 +688,7 @@ static int pmw3610_report_data(const struct device *dev) {
 #endif
 
 // ★ ベクトル長で微ブレ除去（斜め方向にも強くなる！）
-if ((x * x + y * y) < 1) {
+if ((x * x + y * y) < 0.8) {
     x = 0;
     y = 0;
 }
